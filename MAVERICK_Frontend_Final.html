@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAVERICK — Pre-Meeting Sales Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0C1220; --panel:#141C2F; --panel-2:#1A2440; --line:#26314F; --line-soft:#1D2740;
+    --paper:#EAEFF9; --muted:#8B98B8; --dim:#5D6A8C;
+    --signal:#F0B429;
+    --high:#E5484D; --med:#F0B429; --low:#46A758;
+    --link:#7AA7FF;
+    --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif; --display:'Fraunces',serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
+  body{background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:16px;line-height:1.6;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(1100px 500px at 85% -8%, rgba(240,180,41,.08), transparent 60%),
+               radial-gradient(700px 400px at -5% 30%, rgba(122,167,255,.05), transparent 60%);}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.35;
+    background:repeating-linear-gradient(180deg, rgba(255,255,255,.012) 0px, rgba(255,255,255,.012) 1px, transparent 1px, transparent 3px);}
+  a{color:inherit}
+  button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+  :focus-visible{outline:2px solid var(--signal);outline-offset:2px;border-radius:4px}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px;position:relative;z-index:2}
+  .mono{font-family:var(--mono)}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--signal);display:flex;align-items:center;gap:10px}
+  .eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--signal);box-shadow:0 0 10px rgba(240,180,41,.8);flex-shrink:0}
+  ::selection{background:rgba(240,180,41,.3)}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);background:rgba(12,18,32,.82);border-bottom:1px solid var(--line-soft)}
+  nav .inner{max-width:1120px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+  .brand{font-family:var(--mono);font-weight:600;font-size:20px;letter-spacing:.16em}
+  .brand em{color:var(--signal);font-style:normal}
+  .navlinks{display:flex;gap:28px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .navlinks a{text-decoration:none;transition:color .15s;cursor:pointer}
+  .navlinks a:hover{color:var(--paper)}
+  .navcta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;background:var(--signal);color:#161000;padding:9px 16px;border-radius:5px;font-weight:700;text-decoration:none;white-space:nowrap;transition:transform .12s;cursor:pointer}
+  .navcta:hover{transform:translateY(-1px)}
+  @media(max-width:760px){.navlinks{display:none}}
+
+  /* screens */
+  .screen{display:none;position:relative;z-index:2}
+  .screen.on{display:block}
+
+  /* landing page styles */
+  header.hero{padding:88px 0 60px;position:relative}
+  .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:start}
+  @media(max-width:900px){.hero-grid{grid-template-columns:1fr}}
+  h1.headline{font-family:var(--display);font-weight:600;font-size:clamp(34px,4.6vw,58px);line-height:1.06;margin:18px 0 22px;letter-spacing:-.01em}
+  h1.headline .hl{color:var(--signal);font-style:italic;font-weight:500}
+  .hero p.lede{color:var(--muted);font-size:17px;max-width:52ch;margin-bottom:32px}
+  .hero-ctas{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .btn-primary{display:inline-flex;align-items:center;gap:10px;background:var(--signal);color:#161000;font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:15px 26px;border-radius:6px;text-decoration:none;box-shadow:0 10px 30px rgba(240,180,41,.18);transition:transform .12s, box-shadow .12s;cursor:pointer}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(240,180,41,.28)}
+  .btn-primary svg{transition:transform .15s}
+  .btn-primary:hover svg{transform:translateX(3px)}
+  .btn-secondary{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-decoration:none;border-bottom:1px dashed var(--dim);padding-bottom:2px;transition:color .15s;cursor:pointer}
+  .btn-secondary:hover{color:var(--paper)}
+  .hero-note{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:20px;letter-spacing:.02em}
+
+  .terminal{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 30px 70px -20px rgba(0,0,0,.55)}
+  .term-bar{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--line);background:var(--panel-2)}
+  .term-bar .dots{display:flex;gap:6px}
+  .term-bar .dots span{width:9px;height:9px;border-radius:50%;background:var(--line)}
+  .term-bar .label{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+  .term-body{padding:20px}
+  .tline{font-family:var(--mono);font-size:12.5px;color:var(--dim);margin-bottom:9px;display:flex;gap:9px;align-items:baseline}
+  .tline .ok{color:var(--low)}
+  .tline .load{color:var(--signal)}
+  .tsnap{background:var(--panel-2);border:1px solid var(--line);border-radius:7px;padding:14px 16px;margin:14px 0;font-size:13.5px}
+  .tsnap .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+  .tsig{border-left:3px solid var(--high);background:var(--panel-2);border-radius:0 7px 7px 0;padding:12px 14px;margin-top:12px}
+  .tsig .top{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px}
+  .tsig .sev{font-family:var(--mono);font-size:9.5px;color:var(--high);letter-spacing:.08em;text-transform:uppercase}
+  .tsig p{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .tsig .talk{margin-top:8px;font-size:12px;font-style:italic;color:var(--paper);border-top:1px dashed var(--line);padding-top:8px}
+  .caret{display:inline-block;width:7px;height:14px;background:var(--signal);animation:blink 1s steps(2) infinite;vertical-align:-2px}
+  @keyframes blink{50%{opacity:0}}
+
+  .stats{border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:40px 0}
+  .stats .row{display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+  @media(max-width:760px){.stats .row{grid-template-columns:1fr;gap:26px}}
+  .stat .num{font-family:var(--display);font-size:44px;font-weight:600;color:var(--signal);line-height:1}
+  .stat .lbl{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5;max-width:32ch}
+  .stat .src{font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:6px}
+
+  section{padding:96px 0}
+  .sec-head{max-width:640px;margin-bottom:56px}
+  .sec-title{font-family:var(--display);font-size:clamp(26px,3vw,38px);font-weight:600;margin-top:14px;letter-spacing:-.01em}
+  .sec-sub{color:var(--muted);margin-top:14px;font-size:15.5px;max-width:60ch}
+
+  .flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:18px;align-items:stretch}
+  @media(max-width:860px){.flow{grid-template-columns:1fr;}.flow .arrow{transform:rotate(90deg);margin:0 auto}}
+  .flow-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:26px 22px;position:relative}
+  .flow-card.agent{border-color:rgba(240,180,41,.4);background:linear-gradient(180deg, rgba(240,180,41,.06), var(--panel))}
+  .flow-tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+  .flow-card.agent .flow-tag{color:var(--signal)}
+  .flow-title{font-weight:600;font-size:17px;margin:8px 0 10px}
+  .flow-card p{color:var(--muted);font-size:13.5px;line-height:1.55}
+  .arrow{display:flex;align-items:center;color:var(--dim);font-family:var(--mono)}
+
+  .domains{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  @media(max-width:760px){.domains{grid-template-columns:1fr}}
+  .dcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px;transition:border-color .15s, transform .15s}
+  .dcard:hover{border-color:rgba(240,180,41,.4);transform:translateY(-2px)}
+  .dcard .dtop{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+  .dcard .dname{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--signal)}
+  .dcard .dcount{font-family:var(--mono);font-size:11px;color:var(--dim)}
+  .dcard h3{font-size:18px;font-weight:600;margin-bottom:10px;line-height:1.3}
+  .dcard p{color:var(--muted);font-size:14px;line-height:1.6}
+  .dcard .evidence{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);font-family:var(--mono);font-size:11.5px;color:var(--dim)}
+  .dcard .evidence b{color:var(--muted);font-weight:600}
+
+  .quote-block{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:44px;display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center}
+  @media(max-width:700px){.quote-block{grid-template-columns:1fr;padding:30px}}
+  .qmark{font-family:var(--display);font-size:80px;color:rgba(240,180,41,.35);line-height:.6}
+  .quote-text{font-family:var(--display);font-size:clamp(20px,2.4vw,26px);font-style:italic;font-weight:500;line-height:1.42;color:var(--paper)}
+  .quote-attr{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:18px;letter-spacing:.04em}
+  .quote-attr b{color:var(--paper)}
+
+  .toggle-row{display:flex;align-items:center;gap:14px;margin-top:26px}
+  .toggle{position:relative;width:52px;height:28px;background:var(--panel);border:1px solid var(--line);border-radius:20px;cursor:pointer;flex-shrink:0}
+  .toggle .knob{position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:var(--dim);transition:transform .18s, background .18s}
+  .toggle.on .knob{transform:translateX(24px);background:var(--signal)}
+  .toggle-label{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .toggle-label.active{color:var(--paper)}
+  .save-badge{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--low);border:1px solid rgba(70,167,88,.4);border-radius:20px;padding:3px 10px;opacity:0;transition:opacity .18s}
+  .save-badge.show{opacity:1}
+
+  .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px}
+  @media(max-width:900px){.plans{grid-template-columns:1fr}}
+  .plan{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:30px 26px;display:flex;flex-direction:column}
+  .plan.feat{border-color:rgba(240,180,41,.45);background:linear-gradient(180deg, rgba(240,180,41,.05), var(--panel));position:relative}
+  .plan.feat::before{content:"MOST ADOPTED";position:absolute;top:-11px;left:26px;background:var(--signal);color:#161000;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;font-weight:700;padding:3px 10px;border-radius:20px}
+  .plan-name{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal)}
+  .plan-desc{color:var(--muted);font-size:13px;margin:8px 0 22px;min-height:36px;line-height:1.55}
+  .plan-price{display:flex;align-items:baseline;gap:6px;font-family:var(--display)}
+  .plan-price .amt{font-size:38px;font-weight:600}
+  .plan-price .per{font-family:var(--mono);font-size:12px;color:var(--dim)}
+  .plan-note{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:6px;min-height:16px}
+  .plan-feats{list-style:none;margin:24px 0 28px;flex:1}
+  .plan-feats li{font-size:13.5px;color:var(--muted);padding:8px 0 8px 22px;position:relative;border-bottom:1px dashed var(--line-soft)}
+  .plan-feats li:last-child{border-bottom:none}
+  .plan-feats li::before{content:"✓";position:absolute;left:0;color:var(--signal);font-family:var(--mono);font-size:12px}
+  .plan-btn{display:block;text-align:center;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:13px;border-radius:6px;text-decoration:none;font-weight:700;border:1px solid var(--line);color:var(--paper);transition:all .15s;cursor:pointer}
+  .plan-btn:hover{border-color:var(--signal);color:var(--signal)}
+  .plan.feat .plan-btn{background:var(--signal);color:#161000;border-color:var(--signal)}
+  .plan.feat .plan-btn:hover{transform:translateY(-1px)}
+  .pricing-foot{font-family:var(--mono);font-size:11.5px;color:var(--dim);margin-top:26px;line-height:1.7;max-width:70ch}
+
+  .cta-final{padding:100px 0 120px;text-align:center}
+  .cta-panel{background:linear-gradient(160deg, var(--panel-2), var(--panel));border:1px solid rgba(240,180,41,.25);border-radius:16px;padding:64px 32px;position:relative;overflow:hidden}
+  .cta-panel::before{content:"";position:absolute;inset:0;background:radial-gradient(500px 220px at 50% 0%, rgba(240,180,41,.12), transparent 70%);pointer-events:none}
+  .cta-panel h2{font-family:var(--display);font-size:clamp(28px,4vw,42px);font-weight:600;margin-bottom:16px}
+  .cta-panel p{color:var(--muted);max-width:50ch;margin:0 auto 34px;font-size:15.5px}
+
+  footer{border-top:1px solid var(--line-soft);padding:36px 0 50px}
+  .foot-row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.04em}
+  .foot-row a{color:var(--dim);text-decoration:none;cursor:pointer}
+  .foot-row a:hover{color:var(--muted)}
+
+  /* workspace styles */
+  .topbar{border-bottom:1px solid var(--line-soft);padding:20px 0 16px;position:relative;z-index:2}
+  .topbar .inner{max-width:1120px;margin:0 auto;padding:0 24px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .brand-sub{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;margin-top:4px}
+  .data-pill{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:5px 12px;display:flex;align-items:center;gap:7px}
+  .data-pill .d{width:6px;height:6px;border-radius:50%;background:var(--low);box-shadow:0 0 8px rgba(70,167,88,.7)}
+
+  .screen-title{font-family:var(--display);font-size:clamp(24px,3vw,34px);font-weight:600;letter-spacing:-.01em}
+  .screen-sub{color:var(--muted);font-size:14.5px;margin-top:8px;max-width:64ch}
+  .head-row{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:34px}
+  .back-btn{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px dashed var(--dim);padding-bottom:2px;transition:color .15s;cursor:pointer}
+  .back-btn:hover{color:var(--paper)}
+
+  .btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;padding:12px 20px;border-radius:6px;text-decoration:none;transition:transform .12s,border-color .15s,color .15s;white-space:nowrap;cursor:pointer}
+  .btn-amber{background:var(--signal);color:#161000}
+  .btn-amber:hover{transform:translateY(-1px)}
+  .btn-ghost{border:1px solid var(--line);color:var(--paper)}
+  .btn-ghost:hover{border-color:var(--signal);color:var(--signal)}
+  .btn-sm{padding:8px 13px;font-size:10.5px}
+
+  .stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:38px}
+  @media(max-width:820px){.stats-strip{grid-template-columns:repeat(2,1fr)}}
+  .qstat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px}
+  .qstat .num{font-family:var(--display);font-size:32px;font-weight:600;color:var(--signal);line-height:1.05}
+  .qstat .num.blank{color:var(--dim)}
+  .qstat .lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:7px;line-height:1.5}
+  .qstat .sub{font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:4px}
+
+  .dash-grid{display:grid;grid-template-columns:1.55fr .95fr;gap:22px;align-items:start}
+  @media(max-width:900px){.dash-grid{grid-template-columns:1fr}}
+  .panel-box{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--panel-2)}
+  .panel-head .t{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .panel-head .n{font-family:var(--mono);font-size:11px;color:var(--dim)}
+
+  .meet-row{padding:18px 20px;border-bottom:1px solid var(--line-soft)}
+  .meet-row:last-child{border-bottom:none}
+  .meet-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .meet-co{font-weight:600;font-size:16px}
+  .meet-meta{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.6}
+  .meet-meta .sep{color:var(--dim);padding:0 4px}
+  .risk{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:4px;border:1px solid var(--line);white-space:nowrap}
+  .risk.HIGH{color:var(--high);border-color:rgba(229,72,77,.5)}
+  .risk.MEDIUM{color:var(--med);border-color:rgba(240,180,41,.5)}
+  .risk.LOW{color:var(--low);border-color:rgba(70,167,88,.5)}
+  .risk.NONE{color:var(--dim)}
+  .outcome-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:20px;border:1px dashed var(--line);color:var(--muted);white-space:nowrap}
+  .meet-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+  .empty{padding:34px 24px;text-align:center;color:var(--dim);font-family:var(--mono);font-size:12px;line-height:1.8}
+  .empty b{color:var(--muted);font-weight:600}
+
+  .alert-row{padding:15px 20px;border-bottom:1px solid var(--line-soft);border-left:3px solid var(--high)}
+  .alert-row.MEDIUM{border-left-color:var(--med)}
+  .alert-row:last-child{border-bottom:none}
+  .alert-co{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .alert-sig{font-size:13.5px;font-weight:600;line-height:1.45}
+  .alert-sev{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;margin-top:5px}
+  .alert-sev.HIGH{color:var(--high)} .alert-sev.MEDIUM{color:var(--med)}
+
+  .quick-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+
+  .loop-note{font-family:var(--mono);font-size:11px;color:var(--dim);line-height:1.75;margin-top:30px;max-width:80ch}
+  .loop-note b{color:var(--muted);font-weight:600}
+
+  .call-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:22px;align-items:start}
+  @media(max-width:900px){.call-grid{grid-template-columns:1fr}}
+  .q-item{display:flex;gap:14px;align-items:flex-start;padding:14px 20px;border-bottom:1px dashed var(--line-soft);cursor:pointer;transition:background .12s}
+  .q-item:hover{background:var(--panel-2)}
+  .q-item:last-child{border-bottom:none}
+  .q-idx{font-family:var(--mono);font-size:11px;color:var(--signal);padding-top:3px;min-width:22px}
+  .q-text{font-size:14px;line-height:1.55;flex:1}
+  .q-mark{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);border:1px solid var(--line);border-radius:4px;padding:3px 9px;white-space:nowrap;transition:all .12s}
+  .q-item.used .q-mark{color:#161000;background:var(--signal);border-color:var(--signal)}
+  .q-item.used .q-text{color:var(--muted)}
+
+  .sig-live{padding:15px 20px;border-bottom:1px solid var(--line-soft);border-left:3px solid var(--line)}
+  .sig-live.HIGH{border-left-color:var(--high)} .sig-live.MEDIUM{border-left-color:var(--med)} .sig-live.LOW{border-left-color:var(--low)}
+  .sig-live:last-child{border-bottom:none}
+  .sig-live .t{font-size:13.5px;font-weight:600;line-height:1.45}
+  .tri{display:flex;gap:7px;margin-top:9px}
+  .tri button{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border-radius:4px;border:1px solid var(--line);color:var(--dim);transition:all .12s}
+  .tri button:hover{color:var(--paper)}
+  .tri button.on-yes{background:rgba(70,167,88,.14);border-color:var(--low);color:var(--low)}
+  .tri button.on-no{background:rgba(229,72,77,.12);border-color:var(--high);color:var(--high)}
+
+  textarea, input[type=text], input[type=date], input[type=time], select{
+    width:100%;background:var(--ink);border:1px solid var(--line);border-radius:7px;color:var(--paper);
+    font-family:var(--sans);font-size:14px;padding:12px 14px;transition:border-color .15s}
+  textarea:focus,input:focus,select:focus{border-color:var(--signal);outline:none}
+  textarea{resize:vertical;min-height:110px}
+  label.f{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 7px}
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+  @media(max-width:640px){.frow{grid-template-columns:1fr}}
+  .fcol{margin-bottom:18px}
+
+  .fb-wrap{max-width:760px}
+  .fb-sec{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px;margin-bottom:20px}
+  .fb-sec .st{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--signal);margin-bottom:16px;display:flex;align-items:center;gap:12px}
+  .fb-sec .st::after{content:"";flex:1;height:1px;background:var(--line)}
+  .fb-sec .hint{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin:-8px 0 14px;line-height:1.6}
+  .chk-row{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px dashed var(--line-soft)}
+  .chk-row:last-child{border-bottom:none}
+  .chk-row input[type=checkbox]{width:16px;height:16px;margin-top:3px;accent-color:var(--signal);flex-shrink:0}
+  .chk-row .lbl2{font-size:14px;line-height:1.5;cursor:pointer}
+  .chk-row .sev-mini{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;margin-left:8px}
+  .sev-mini.HIGH{color:var(--high)} .sev-mini.MEDIUM{color:var(--med)} .sev-mini.LOW{color:var(--low)}
+  .rate-row{display:flex;gap:9px}
+  .rate-row button{width:44px;height:44px;border:1px solid var(--line);border-radius:7px;font-family:var(--mono);font-size:14px;color:var(--muted);transition:all .12s;cursor:pointer}
+  .rate-row button:hover{border-color:var(--signal);color:var(--signal)}
+  .rate-row button.sel{background:var(--signal);border-color:var(--signal);color:#161000;font-weight:700}
+  .radio-row{display:flex;gap:9px;flex-wrap:wrap}
+  .radio-row button{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:10px 16px;border-radius:6px;border:1px solid var(--line);color:var(--muted);transition:all .12s;cursor:pointer}
+  .radio-row button:hover{color:var(--paper)}
+  .radio-row button.sel{background:rgba(240,180,41,.12);border-color:var(--signal);color:var(--signal);font-weight:700}
+  .saved-flag{font-family:var(--mono);font-size:11px;color:var(--low);letter-spacing:.06em;text-transform:uppercase;display:none;margin-left:14px}
+  .saved-flag.show{display:inline}
+
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(6,10,20,.78);z-index:60;backdrop-filter:blur(4px);align-items:flex-start;justify-content:center;overflow-y:auto;padding:60px 20px}
+  .modal-bg.on{display:flex}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:12px;max-width:620px;width:100%;padding:28px}
+  .modal .mt{font-family:var(--display);font-size:22px;font-weight:600;margin-bottom:6px}
+  .modal .ms{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:22px;line-height:1.7}
+  .modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}
+
+  .import-note{background:var(--panel-2);border:1px dashed var(--line);border-radius:8px;padding:14px 16px;font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.75;margin-bottom:18px}
+  .import-note b{color:var(--signal);font-weight:600}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="inner">
+    <div class="brand">MAVER<em>I</em>CK</div>
+    <div class="navlinks" id="navLinks">
+      <a data-nav="landing">Landing</a>
+      <a data-nav="generator">Generator</a>
+      <a data-nav="workspace">Workspace</a>
+    </div>
+    <a class="navcta" id="navCTA" data-nav="generator">Try the demo →</a>
+  </div>
+</nav>
+
+<style>
+  /* generator + brief styles */
+  .gen-panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:36px;max-width:840px;margin:0 auto}
+  @media(max-width:640px){.gen-panel{padding:22px}}
+  .gen-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--signal);margin-bottom:10px}
+  .gen-note{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:18px;line-height:1.7}
+  .prog-line{font-family:var(--mono);font-size:13px;color:var(--muted);padding:13px 0;border-bottom:1px dashed var(--line-soft);display:flex;gap:12px;align-items:center}
+  .prog-line:last-child{border-bottom:none}
+  .prog-line .st{min-width:90px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+  .prog-line.doing .st{color:var(--signal)} .prog-line.done .st{color:var(--low)}
+  .prog-timer{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:20px}
+  .error-box{border:1px solid rgba(229,72,77,.5);background:rgba(229,72,77,.06);border-radius:8px;padding:20px;font-size:14px;margin-top:24px}
+  .error-box h3{color:var(--high);font-family:var(--mono);font-size:13px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+  .error-box ul{margin:10px 0 0 18px;color:var(--muted);font-size:13px}
+
+  .sbrief-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:8px}
+  .sbrief-head h3{font-family:var(--display);font-size:26px;font-weight:600}
+  .sconf{font-family:var(--mono);font-size:11px;letter-spacing:.08em;padding:5px 11px;border-radius:5px;border:1px solid rgba(70,167,88,.5);color:var(--low);text-transform:uppercase;white-space:nowrap}
+  .sconf.LOW{border-color:rgba(229,72,77,.5);color:var(--high)}
+  .sconf.MEDIUM{border-color:rgba(240,180,41,.5);color:var(--med)}
+  .smeta{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:16px}
+  .ssummary{color:var(--paper);font-size:14.5px;line-height:1.65;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin-bottom:30px}
+  .ssig{border:1px solid var(--line);border-left:3px solid var(--med);border-radius:8px;padding:20px 22px;margin-bottom:16px;background:var(--panel-2)}
+  .ssig.HIGH{border-left-color:var(--high)} .ssig.LOW{border-left-color:var(--low)}
+  .ssig-top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  .ssig-title{font-weight:600;font-size:15.5px;max-width:60ch}
+  .stags{display:flex;gap:8px;flex-wrap:wrap}
+  .stag{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:3px;background:var(--ink);border:1px solid var(--line);color:var(--muted)}
+  .stag.HIGH{color:var(--high)} .stag.MEDIUM{color:var(--med)} .stag.LOW{color:var(--low)}
+  .srow{margin:10px 0;font-size:14px}
+  .srow b{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);display:block;margin-bottom:4px}
+  .srow p{color:var(--muted);line-height:1.55}
+  .srow a{color:var(--link)}
+  .stalk{background:var(--ink);border:1px dashed var(--line);border-radius:6px;padding:12px 14px;font-size:13.5px;color:var(--paper);font-style:italic}
+  .ssec-title{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--signal);margin:32px 0 14px;display:flex;align-items:center;gap:12px}
+  .ssec-title::after{content:"";flex:1;height:1px;background:var(--line)}
+  ol.sqs{list-style:none;counter-reset:sq}
+  ol.sqs li{counter-increment:sq;padding:11px 0 11px 40px;position:relative;border-bottom:1px dashed var(--line-soft);font-size:14px;color:var(--paper)}
+  ol.sqs li::before{content:counter(sq,decimal-leading-zero);position:absolute;left:0;top:11px;font-family:var(--mono);color:var(--signal);font-size:12px}
+  ul.schk{list-style:none}
+  ul.schk li{padding:9px 0 9px 28px;position:relative;font-size:14px;color:var(--paper);border-bottom:1px dashed var(--line-soft)}
+  ul.schk li::before{content:"◻";position:absolute;left:2px;color:var(--signal)}
+  
+  /* Discovery questions as compact leverage checkpoints */
+  .sq-grid{display:grid;grid-template-columns:1fr;gap:0;margin-top:14px}
+  .sq-item{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px dashed var(--line-soft);font-size:14px}
+  .sq-item:last-child{border-bottom:none}
+  .sq-check{width:18px;height:18px;flex-shrink:0;margin-top:1px;accent-color:var(--signal);cursor:pointer}
+  .sq-item label{flex:1;color:var(--paper);cursor:pointer;line-height:1.5}
+  .brief-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:34px;padding-top:24px;border-top:1px solid var(--line)}
+  .raw-fallback{background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:16px;font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:pre-wrap;word-break:break-word;max-height:400px;overflow:auto}
+</style>
+
+<!-- ================= VIEW: LANDING ================= -->
+<div class="screen on" id="scr-landing">
+
+
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Pre-Meeting Sales Intelligence Agent</div>
+        <h1 class="headline">Know where the prospect<br>is <span class="hl">hurting</span> before the meeting starts.</h1>
+        <p class="lede">MAVERICK reads a prospect's public footprint — filings, reviews, trade signals, regulatory news — and turns it into a 1–2 page brief on their tax, GST, customs, and logistics pain. Built for reps selling into that world, not generic firmographics.</p>
+        <div class="hero-ctas">
+          <a class="btn-primary" data-nav="generator">
+            Try the demo agent
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M12 7L7 2M12 7L7 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a class="btn-secondary" href="#pricing">View pricing</a>
+        </div>
+        <div class="hero-note">→ free, no signup — enter a sample company, get a sourced brief in minutes.</div>
+      </div>
+
+      <div class="terminal">
+        <div class="term-bar">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <div class="label">agent.run — sundaram_exports</div>
+        </div>
+        <div class="term-body">
+          <div class="tline"><span class="ok">✓</span> dispatching request to agent</div>
+          <div class="tline"><span class="ok">✓</span> scanning public web — company signals</div>
+          <div class="tline"><span class="load">●</span> detecting &amp; scoring pain signals<span class="caret"></span></div>
+          <div class="tsnap">
+            <div class="k">Sundaram Exports · Textiles · Tirupur</div>
+            confidence: HIGH · pain_signals: 3 · sources: 7
+          </div>
+          <div class="tsig">
+            <div class="top"><span>IGST refund backlog on FY24 shipments</span><span class="sev">High</span></div>
+            <p>~90-day IGST refund delays on shipping bills filed via ICEGATE are tying up working capital across the Tirupur cluster.</p>
+            <div class="talk">"Are you still seeing the 90-day IGST refund lag on the FY24 shipping bills, or has the recent CBIC circular started clearing that backlog?"</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-note" style="margin-top:14px"><a href="#sample" class="btn-secondary">See the full brief this came from →</a></div>
+    </div>
+  </header>
+</div>
+
+<div class="stats" id="problem">
+  <div class="wrap">
+    <div class="row">
+      <div class="stat">
+        <div class="num">15–30<span style="font-size:20px">min</span></div>
+        <div class="lbl">spent per prospect stitching together websites, filings, CRM notes, and news before a single call.</div>
+      </div>
+      <div class="stat">
+        <div class="num">65.1<span style="font-size:26px">%</span></div>
+        <div class="lbl">of reps cite insufficient time as their primary barrier to real pre-call research.</div>
+      </div>
+      <div class="stat">
+        <div class="num">82<span style="font-size:26px">%</span></div>
+        <div class="lbl">of B2B decision-makers say the sales rep in front of them arrived unprepared.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section id="sample">
+    <div class="sec-head">
+      <div class="eyebrow">Sample output</div>
+      <h2 class="sec-title">This is what actually comes back</h2>
+      <p class="sec-sub">Not a mockup — this is a real brief the live agent generated for a sample prospect, unedited except for length.</p>
+    </div>
+
+    <div class="sample-wrap">
+      <div class="sample-bar">
+        <div class="label">brief.output — sundaram_exports.json</div>
+        <div class="live-pill"><span class="d"></span>Generated by the live agent</div>
+      </div>
+
+      <div class="sample-body">
+        <div class="sbrief-head">
+          <h3>Sundaram Exports Pvt Ltd</h3>
+          <span class="sconf">Confidence: High</span>
+        </div>
+        <div class="smeta">Textiles &amp; Apparel · Tirupur, TN · Meeting: 18 Nov · Role: CFO</div>
+        <div class="ssummary">Mid-sized knitwear exporter, ~₹340cr revenue, 60% of sales into the EU. Recent trade press flags margin pressure from new EU carbon-border rules and delayed IGST refunds on a portion of FY24 shipments.</div>
+
+        <div class="ssig sev-High">
+          <div class="ssig-top">
+            <div class="ssig-title">IGST refund backlog on FY24 export shipments</div>
+            <div class="stags"><span class="stag">GST</span><span class="stag sev-High">High severity</span><span class="stag">Company-specific</span></div>
+          </div>
+          <div class="srow"><b>Evidence</b><p>ET Retail (Sep 2025) cites Tirupur exporters flagging ~90-day IGST refund delays on shipping bills filed via ICEGATE, tying up working capital across the cluster.</p></div>
+          <div class="srow"><b>Talk track</b><div class="stalk">"Are you still seeing the 90-day IGST refund lag on the FY24 shipping bills, or has the recent CBIC circular started clearing that backlog for you?"</div></div>
+        </div>
+
+        <div class="ssig sev-Medium">
+          <div class="ssig-top">
+            <div class="ssig-title">EU CBAM reporting exposure on synthetic-blend lines</div>
+            <div class="stags"><span class="stag">Customs / FTP</span><span class="stag sev-Medium">Medium severity</span><span class="stag">Industry-pattern</span></div>
+          </div>
+          <div class="srow"><b>Evidence</b><p>CBAM transitional reporting expanded to downstream textile inputs in 2025; exporters with polyester-cotton blends now face quarterly embedded-emissions declarations.</p></div>
+          <div class="srow"><b>Talk track</b><div class="stalk">"How is the team handling CBAM quarterly declarations on the poly-blend SKUs — is that landing on finance or on your logistics partner?"</div></div>
+        </div>
+
+        <div class="ssig sev-Low">
+          <div class="ssig-top">
+            <div class="ssig-title">New Chennai–Hamburg direct sailing changes lane economics</div>
+            <div class="stags"><span class="stag">Logistics</span><span class="stag sev-Low">Low severity</span><span class="stag">Industry-pattern</span></div>
+          </div>
+          <div class="srow"><b>Evidence</b><p>Maersk added a direct Chennai–Hamburg string in Q3 2025, cutting transit ~9 days vs. transshipment via Colombo — relevant for EU-heavy exporters.</p></div>
+          <div class="srow"><b>Talk track</b><div class="stalk">"Have you re-costed the EU lane since Maersk opened the direct Chennai–Hamburg string in October?"</div></div>
+        </div>
+
+        <div class="ssec-title">Discovery questions</div>
+        <ol class="sqs">
+          <li>How much working capital is currently tied up in unrefunded IGST on export shipments?</li>
+          <li>Who owns CBAM reporting internally — finance, compliance, or a 3PL?</li>
+          <li>What triggered the review of your current tax / customs advisor?</li>
+        </ol>
+
+        <div class="ssec-title">Pre-call checklist</div>
+        <ul class="schk">
+          <li>Pull latest CBIC IGST refund circular (Aug 2025)</li>
+          <li>Prepare CBAM quarterly-declaration one-pager</li>
+          <li>Reference the Tirupur exporters cluster note</li>
+          <li>Confirm CFO decision authority on advisor switch</li>
+        </ul>
+      </div>
+
+      <div class="sample-foot">
+        <span>40–90s per brief · 3–5 live searches · pain_signals: 3 · sources: 7</span>
+        <span>Public sources only — no GSTN, ICEGATE or carrier account data accessed</span>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:36px">
+      <a class="btn-primary" data-nav="generator">
+        Generate your own sample brief
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M12 7L7 2M12 7L7 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="sec-head">
+      <div class="eyebrow">The model</div>
+      <h2 class="sec-title">A → Agent → B</h2>
+      <p class="sec-sub">The agent isn't for the prospect, and it isn't a research tool for its own sake. It exists to move one thing: what's true about B's operational pain, into A's hands, before the call.</p>
+    </div>
+    <div class="flow">
+      <div class="flow-card">
+        <div class="flow-tag">A — Sales rep</div>
+        <div class="flow-title">Not enough time, too many tabs</div>
+        <p>Account executives selling tax, compliance, and logistics software into mid-market and SME accounts, juggling 10–15 live prospects a week.</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-card agent">
+        <div class="flow-tag">Agent — MAVERICK</div>
+        <div class="flow-title">Detects &amp; translates pain</div>
+        <p>Runs targeted searches per prospect, grounds every signal in a real source, and converts it into a sourced, meeting-ready brief.</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-card">
+        <div class="flow-tag">B — Prospect company</div>
+        <div class="flow-title">Real, identifiable pain</div>
+        <p>CFOs, finance directors, and logistics heads already fighting ITC mismatches, refund delays, and customs holds — the raw material for the brief.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="domains">
+    <div class="sec-head">
+      <div class="eyebrow">Signal domains</div>
+      <h2 class="sec-title">Four places prospects are already hurting</h2>
+      <p class="sec-sub">Each domain below is grounded in documented, sourced pain signals — not assumptions about what a company "might" be dealing with.</p>
+    </div>
+    <div class="domains">
+      <div class="dcard">
+        <div class="dtop"><span class="dname">GST &amp; ITC</span><span class="dcount">Signals 1–3</span></div>
+        <h3>Filing windows that punish being ready</h3>
+        <p>Portal downtime during peak filing periods, core-field amendments stuck pending for weeks, and reconciliation workflows that force manual re-uploads — all while ITC interest penalties keep accruing at 18–24% annually.</p>
+        <div class="evidence"><b>Anchor:</b> 39% of invoices carry errors requiring manual investigation before filing.</div>
+      </div>
+      <div class="dcard">
+        <div class="dtop"><span class="dname">Logistics</span><span class="dcount">Signals 4–7</span></div>
+        <h3>Tracking blackouts, silent weight disputes</h3>
+        <p>Shipment status freezes with no courier accountability, fraudulent RTO markings that push cost back onto the seller, and weight-dispute notifications that arrive weeks after the 7-day contest window has closed.</p>
+        <div class="evidence"><b>Anchor:</b> 82% of logistics operations report manual documentation as a heavy-to-extreme drag on efficiency.</div>
+      </div>
+      <div class="dcard">
+        <div class="dtop"><span class="dname">Customs</span><span class="dcount">Signals 8–9</span></div>
+        <h3>One glitch, every shipment at the port</h3>
+        <p>ICEGATE payment and DSC-authentication failures freeze duty payments outright, cascading into RBI forex compliance flags — for errors the importer never caused and can't self-resolve.</p>
+        <div class="evidence"><b>Anchor:</b> ~30% of shipment delays trace back to HS code misclassification.</div>
+      </div>
+      <div class="dcard">
+        <div class="dtop"><span class="dname">Foreign Trade Policy</span><span class="dcount">Signal 10</span></div>
+        <h3>Penalised for the portal's own bugs</h3>
+        <p>DGFT incentive schemes have applied submission-date logic that silently docked exporters for system errors, with no audit trail to appeal — a pattern that erodes trust in digital filing itself.</p>
+        <div class="evidence"><b>Anchor:</b> 648+ annual compliance obligations tracked, largely by hand, at a single-state logistics company.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="quote-block">
+      <div class="qmark">“</div>
+      <div>
+        <div class="quote-text">I spend more time researching accounts than I do actually selling. By the time I get to a call, I still don't know their real pain — so I end up pitching features instead of solving problems.</div>
+        <div class="quote-attr"><b>Arjun Mehta</b> — Senior Account Executive, Tax &amp; Compliance SaaS · the rep MAVERICK is built for</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="mvp">
+    <div class="sec-head">
+      <div class="eyebrow">Inside the MVP</div>
+      <h2 class="sec-title">One brief, five screens, no detours</h2>
+      <p class="sec-sub">Everything in the product exists to support the Prospect Brief — the core surface reps actually use before a call. Nothing else made the cut for v1.</p>
+    </div>
+    <div class="screens">
+      <div class="screen-row active">
+        <div class="snum">01</div>
+        <div><div class="stitle">Dashboard</div><div class="spurpose">Upcoming meetings, prioritised by risk level</div></div>
+        <div class="swhy">Helps reps decide who to prep for first</div>
+      </div>
+      <div class="screen-row">
+        <div class="snum">02</div>
+        <div><div class="stitle">Prospect input</div><div class="spurpose">Company, industry, location, meeting context</div></div>
+        <div class="swhy">Starts brief generation — under a minute to fill</div>
+      </div>
+      <div class="screen-row">
+        <div class="snum">03</div>
+        <div><div class="stitle">Brief generation</div><div class="spurpose">Live status as the agent searches and compiles</div></div>
+        <div class="swhy">Transparency in what sources were checked</div>
+      </div>
+      <div class="screen-row active">
+        <div class="snum">04</div>
+        <div><div class="stitle">Prospect brief</div><div class="spurpose">Pain signals, evidence, talk tracks, discovery questions</div></div>
+        <div class="swhy">The core MVP surface — this is what gets read before the call</div>
+      </div>
+      <div class="screen-row">
+        <div class="snum">05</div>
+        <div><div class="stitle">Post-call feedback</div><div class="spurpose">Confirm which signals landed, rate relevance</div></div>
+        <div class="swhy">Closes the loop — improves future briefs</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <div class="sec-head">
+      <div class="eyebrow">Subscriptions</div>
+      <h2 class="sec-title">Priced per seat, like the rest of your sales stack</h2>
+      <p class="sec-sub">One rep, one seat, one live agent. Annual contracts get the same discount you'd expect from any CRM or enablement tool — no separate negotiation needed.</p>
+      <div class="toggle-row">
+        <span class="toggle-label active" id="lblMonthly">Monthly</span>
+        <div class="toggle" id="billToggle" role="switch" aria-checked="false" tabindex="0"><div class="knob"></div></div>
+        <span class="toggle-label" id="lblAnnual">Annual</span>
+        <span class="save-badge" id="saveBadge">Save ~17%</span>
+      </div>
+    </div>
+
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-name">Individual</div>
+        <div class="plan-desc">One rep, one login. Full brief generation, no team surfaces.</div>
+        <div class="plan-price"><span class="amt price" data-monthly="4000" data-annual="3333">₹4,000</span><span class="per">/ seat / mo</span></div>
+        <div class="plan-note note">billed monthly</div>
+        <ul class="plan-feats">
+          <li>Unlimited prospect briefs</li>
+          <li>GST · customs · logistics · FTP signal domains</li>
+          <li>Discovery questions &amp; talk tracks</li>
+          <li>Post-call feedback loop</li>
+        </ul>
+        <a class="plan-btn checkout-link" data-plan="individual" data-nav="generator" data-demo-checkout="1">Subscribe — Individual</a>
+      </div>
+
+      <div class="plan feat">
+        <div class="plan-name">Team</div>
+        <div class="plan-desc">For sales orgs standardising prep across every rep. 5-seat minimum.</div>
+        <div class="plan-price"><span class="amt price" data-monthly="3500" data-annual="2917">₹3,500</span><span class="per">/ seat / mo</span></div>
+        <div class="plan-note note">billed monthly · 5 seats min.</div>
+        <ul class="plan-feats">
+          <li>Everything in Individual</li>
+          <li>Manager view — adoption &amp; consistency metrics</li>
+          <li>Common pain-cluster reporting across accounts</li>
+          <li>Priority signal-source refresh</li>
+        </ul>
+        <a class="plan-btn checkout-link" data-plan="team" data-nav="generator" data-demo-checkout="1">Subscribe — Team</a>
+      </div>
+
+      <div class="plan">
+        <div class="plan-name">Enterprise</div>
+        <div class="plan-desc">Custom deployment for larger vendor sales orgs and multi-team rollouts.</div>
+        <div class="plan-price"><span class="amt">Custom</span></div>
+        <div class="plan-note">volume pricing, annual only</div>
+        <ul class="plan-feats">
+          <li>Everything in Team</li>
+          <li>Admin controls &amp; SSO</li>
+          <li>Custom domain signal tuning</li>
+          <li>Dedicated onboarding &amp; support SLA</li>
+        </ul>
+        <a class="plan-btn" href="mailto:hello@maverick-sales.app?subject=MAVERICK%20Enterprise%20pricing">Talk to sales</a>
+      </div>
+    </div>
+
+    <p class="pricing-foot">Pricing basis: ~₹40,000 / rep / year on annual contracts, in line with Phase 1 commercial modelling. Directional figures — final pricing is set during pilot onboarding, not audited or final.</p>
+  </section>
+
+  <div class="cta-final">
+    <div class="wrap">
+      <div class="cta-panel">
+        <div class="eyebrow" style="justify-content:center">Free demo</div>
+        <h2>Try MAVERICK on a sample prospect</h2>
+        <p>Enter a company name and the demo agent will search, detect, and compile a sourced pain-signal brief — no account, no card, no commitment.</p>
+        <a class="btn-primary" data-nav="generator">
+          Try the demo agent
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M12 7L7 2M12 7L7 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <div style="margin-top:16px"><a class="btn-secondary" href="#pricing">Ready to subscribe? See plans</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-row">
+      <div>MAVERICK — AI Pre-Meeting Sales Intelligence Agent · BITSoM × PwC, Product Management with Generative &amp; Agentic AI · Phase 1</div>
+      <div><a data-nav="generator">Try the demo</a></div>
+    </div>
+  </div>
+</footer>
+
+
+</div>
+
+<!-- ================= VIEW: GENERATOR (input) ================= -->
+<div class="screen" id="scr-input">
+  <div class="wrap" style="padding:48px 0 90px">
+    <div class="gen-panel">
+      <div class="gen-eyebrow">Screen 01 / Prospect Input</div>
+      <h1 class="screen-title">Generate a pre-meeting brief</h1>
+      <p class="screen-sub" style="margin-bottom:28px">The agent runs live web searches on your prospect and returns the top 3 pain signals, discovery questions, and a pre-call checklist. Signals are grounded in public data — company-specific where found, industry-pattern where not.</p>
+      <div class="import-note" id="linkedBanner" style="display:none"></div>
+      <div class="fcol"><label class="f" for="gCo">Company name *</label><input type="text" id="gCo" placeholder="e.g. Sundaram Exports Pvt Ltd"></div>
+      <div class="frow">
+        <div><label class="f" for="gInd">Industry</label>
+          <select id="gInd"><option>Manufacturing</option><option>Export / Trading</option><option>E-commerce / D2C</option><option>Pharmaceuticals</option><option>Textiles &amp; Apparel</option><option>Auto Components</option><option>FMCG</option><option>Electronics</option><option>Chemicals</option><option>Other</option></select></div>
+        <div><label class="f" for="gLoc">Location</label><input type="text" id="gLoc" value="India"></div>
+      </div>
+      <div class="frow">
+        <div><label class="f" for="gRole">Prospect role</label>
+          <select id="gRole"><option>CFO</option><option>Finance Director</option><option>Head of Logistics</option><option>Supply Chain Director</option><option>Tax / Compliance Head</option><option>Founder / MD</option><option>Other</option></select></div>
+        <div><label class="f" for="gDate">Meeting date</label>
+          <div style="position:relative;display:flex;align-items:center">
+            <input type="date" id="gDate" style="flex:1">
+            <div style="position:absolute;right:12px;pointer-events:none;color:var(--signal);font-size:18px">📅</div>
+          </div>
+        </div>
+      </div>
+      <div class="fcol"><label class="f" for="gNotes">CRM notes (optional)</label><textarea id="gNotes" style="min-height:90px" placeholder="Prior interactions, known context, what triggered this meeting..."></textarea></div>
+      <button class="btn btn-amber" id="btnGenerate">▸ Generate brief</button>
+      <div class="gen-note">Typical run time 40–90 seconds. The agent performs 3–5 live web searches per brief.<br>Backend: <span id="backendState">checking…</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= VIEW: GENERATOR (progress) ================= -->
+<div class="screen" id="scr-progress">
+  <div class="wrap" style="padding:48px 0 90px">
+    <div class="gen-panel">
+      <div class="gen-eyebrow">Screen 02 / Brief Generation</div>
+      <h1 class="screen-title" id="progTitle">Generating brief…</h1>
+      <p class="screen-sub" style="margin-bottom:26px">The agent is searching the public web and scoring pain signals. Do not close this page.</p>
+      <div id="progList">
+        <div class="prog-line" data-step="0"><span class="st">Queued</span>Dispatching request to agent</div>
+        <div class="prog-line" data-step="1"><span class="st">Queued</span>Pulling company data &amp; scanning news</div>
+        <div class="prog-line" data-step="2"><span class="st">Queued</span>Detecting &amp; scoring pain signals</div>
+        <div class="prog-line" data-step="3"><span class="st">Queued</span>Compiling brief</div>
+      </div>
+      <div class="prog-timer" id="progTimer">Elapsed: 0s</div>
+      <div id="progError"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= VIEW: GENERATOR (brief output) ================= -->
+<div class="screen" id="scr-brief">
+  <div class="wrap" style="padding:48px 0 90px">
+    <div class="gen-panel" style="max-width:900px">
+      <div class="gen-eyebrow">Screen 03 / Prospect Brief</div>
+      <div id="briefBody"></div>
+      <div class="brief-actions" id="briefActions"></div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- ══════════════════ SCREEN 00 / DASHBOARD ══════════════════ -->
+<div class="screen" id="scr-dash">
+  <div class="wrap">
+    <div class="head-row">
+      <div>
+        <div class="eyebrow">Screen 00 / Dashboard</div>
+        <h1 class="screen-title">Upcoming meetings</h1>
+        <p class="screen-sub">Meetings you add here, prioritised by the risk level of their linked brief. No CRM sync in this build — entries are manual by design.</p>
+      </div>
+      <div class="quick-actions">
+        <button class="btn btn-amber" id="btnNewMeeting">+ New meeting</button>
+        <button class="btn btn-ghost" data-nav="generator">Open brief generator →</button>
+      </div>
+    </div>
+
+    <div class="stats-strip" id="statsStrip"></div>
+
+    <div class="dash-grid">
+      <div class="panel-box">
+        <div class="panel-head"><span class="t">Meetings</span><span class="n" id="meetCount"></span></div>
+        <div id="meetList"></div>
+      </div>
+      <div>
+        <div class="panel-box">
+          <div class="panel-head"><span class="t">Priority alerts</span><span class="n" id="alertCount"></span></div>
+          <div id="alertList"></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="loop-note"><b>How the quality loop works in this build:</b> the agent generates a brief → you link it to a meeting → after the call you log which signals were confirmed, rate the brief, and record the outcome. The stats above aggregate that feedback. It is stored and displayed for review — it does <b>not</b> automatically retrain the agent. Prompt improvements from feedback are a manual step in n8n.</p>
+  </div>
+</div>
+
+<!-- ══════════════════ SCREEN 04 / IN-CALL SUPPORT ══════════════════ -->
+<div class="screen" id="scr-call">
+  <div class="wrap">
+    <div class="head-row">
+      <div>
+        <div class="eyebrow">Screen 04 / In-Call Support</div>
+        <h1 class="screen-title" id="callTitle">In-call</h1>
+        <p class="screen-sub" id="callMeta"></p>
+      </div>
+      <button class="back-btn" data-nav="dash">← Back to dashboard</button>
+    </div>
+
+    <div class="call-grid">
+      <div class="panel-box">
+        <div class="panel-head"><span class="t">Discovery prompts — tap when used</span><span class="n" id="qUsedCount"></span></div>
+        <div id="callQuestions"></div>
+      </div>
+      <div>
+        <div class="panel-box" style="margin-bottom:20px">
+          <div class="panel-head"><span class="t">Pain signals — confirm live</span></div>
+          <div id="callSignals"></div>
+        </div>
+        <div class="panel-box" style="padding:20px">
+          <label class="f" for="callNotes">Live notes (auto-saved)</label>
+          <textarea id="callNotes" placeholder="What they said, objections, numbers mentioned..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:26px;display:flex;gap:12px;flex-wrap:wrap">
+      <button class="btn btn-amber" id="btnCallToFeedback">End call → log feedback</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ SCREEN 05 / POST-CALL FEEDBACK ══════════════════ -->
+<div class="screen" id="scr-fb">
+  <div class="wrap">
+    <div class="head-row">
+      <div>
+        <div class="eyebrow">Screen 05 / Post-Call Feedback</div>
+        <h1 class="screen-title" id="fbTitle">Post-call feedback</h1>
+        <p class="screen-sub" id="fbMeta"></p>
+      </div>
+      <button class="back-btn" data-nav="dash">← Back to dashboard</button>
+    </div>
+
+    <div class="fb-wrap">
+      <div class="fb-sec">
+        <div class="st">Confirmed pain points</div>
+        <p class="hint">Tick the signals the prospect actually confirmed on the call. Unticked = not confirmed or false.</p>
+        <div id="fbSignals"></div>
+        <div class="chk-row" style="border-top:1px dashed var(--line-soft);margin-top:4px">
+          <input type="checkbox" id="fbNone">
+          <label class="lbl2" for="fbNone" style="color:var(--muted)">None confirmed — brief missed on this account</label>
+        </div>
+      </div>
+
+      <div class="fb-sec">
+        <div class="st">Brief relevance</div>
+        <p class="hint">1 = wasted prep time · 5 = shaped the whole conversation</p>
+        <div class="rate-row" id="fbRate"></div>
+      </div>
+
+      <div class="fb-sec">
+        <div class="st">Discovery questions used</div>
+        <div id="fbQuestions"></div>
+      </div>
+
+      <div class="fb-sec">
+        <div class="st">Call outcome</div>
+        <div class="radio-row" id="fbOutcome"></div>
+      </div>
+
+      <div class="fb-sec">
+        <div class="st">Notes</div>
+        <textarea id="fbNotes" placeholder="New pains surfaced, what was wrong in the brief, next step agreed..."></textarea>
+      </div>
+
+      <div style="display:flex;align-items:center">
+        <button class="btn btn-amber" id="btnSaveFb">Save feedback</button>
+        <span class="saved-flag" id="fbSaved">✓ Saved</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ MODAL: new / edit meeting ══════════════════ -->
+<div class="modal-bg" id="modalMeeting">
+  <div class="modal">
+    <div class="mt" id="mmTitle">New meeting</div>
+    <div class="ms">Node 01 — meeting scheduled / prospect selected. Manual entry; there is no CRM integration in this build.</div>
+    <div class="fcol"><label class="f" for="mCo">Company name *</label><input type="text" id="mCo" placeholder="e.g. Sundaram Exports Pvt Ltd"></div>
+    <div class="frow">
+      <div><label class="f" for="mDate">Meeting date *</label>
+        <div style="position:relative;display:flex;align-items:center">
+          <input type="date" id="mDate" style="flex:1">
+          <div style="position:absolute;right:12px;pointer-events:none;color:var(--signal);font-size:18px">📅</div>
+        </div>
+      </div>
+      <div><label class="f" for="mTime">Time</label><input type="time" id="mTime"></div>
+    </div>
+    <div class="frow">
+      <div><label class="f" for="mRole">Prospect role</label>
+        <select id="mRole"><option>CFO</option><option>Finance Director</option><option>Head of Logistics</option><option>Supply Chain Director</option><option>Tax / Compliance Head</option><option>Founder / MD</option><option>Other</option></select>
+      </div>
+      <div><label class="f" for="mInd">Industry</label>
+        <select id="mInd"><option>Manufacturing</option><option>Textiles & Apparel</option><option>Pharma</option><option>Auto & Components</option><option>Electronics</option><option>Agri / FMCG Export</option><option>Logistics / 3PL</option><option>E-commerce</option><option>Other</option></select>
+      </div>
+    </div>
+    <div class="fcol"><label class="f" for="mNotes">Context notes (optional)</label><textarea id="mNotes" style="min-height:70px" placeholder="What triggered this meeting, prior interactions..."></textarea></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close="modalMeeting">Cancel</button>
+      <button class="btn btn-amber" id="btnSaveMeeting">Save meeting</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ MODAL: link brief ══════════════════ -->
+<div class="modal-bg" id="modalImport">
+  <div class="modal">
+    <div class="mt">Link a brief to <span id="impCo" style="color:var(--signal)"></span></div>
+    <div class="ms">Attaches the agent's pain signals and discovery questions to this meeting, which sets its risk level and powers the in-call and feedback screens.</div>
+    <div class="import-note" id="impStatus"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+      <button class="btn btn-ghost btn-sm" id="btnImpLast">Import last generated brief</button>
+      <button class="btn btn-ghost btn-sm" data-nav="generator" data-close-first="modalImport">Generate one now →</button>
+    </div>
+    <div class="fcol">
+      <label class="f" for="impPaste">Or paste the brief JSON (from an n8n execution)</label>
+      <textarea id="impPaste" style="min-height:90px;font-family:var(--mono);font-size:12px" placeholder='{"company_snapshot": ... , "pain_signals": [...]}'></textarea>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close="modalImport">Cancel</button>
+      <button class="btn btn-amber" id="btnImpPaste">Import pasted JSON</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ═══════════ CONFIG — the only line you may need to edit ═══════════ */
+/* ═══════════ CONFIG — UPDATE WEBHOOK URL FOR NEW N8N INSTANCE ═══════════
+   
+   When you create a new n8n Cloud account:
+   1. Import MAVERICK_Agent_Workflow.json
+   2. Open "Prospect Input Webhook" node
+   3. Copy the Production URL (looks like: https://[YOUR_SUBDOMAIN].app.n8n.cloud/webhook/maverick-brief)
+   4. Replace the WEBHOOK_URL below with your new URL
+   
+   Everything else stays the same — just update this one URL.
+═══════════════════════════════════════════════════════════════════════ */
+const CONFIG = {
+  WEBHOOK_URL: 'https://rahuljolly011002.app.n8n.cloud/webhook/maverick-brief'  // ← UPDATE THIS
+};
+
+/* ═══════════ state ═══════════ */
+const LS_KEY = 'maverick_ws_meetings';
+const LS_BRIEF = 'maverick_last_brief';
+let meetings = [];
+try { meetings = JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch(e){ meetings = []; }
+let activeId = null, editId = null, importId = null;
+let pendingLinkId = null;      // meeting a fresh generation should attach to
+let currentBrief = null;       // last normalized brief in this session
+let currentBriefRaw = null;
+let currentCtx = null;         // form context of last generation
+
+const save = () => localStorage.setItem(LS_KEY, JSON.stringify(meetings));
+const byId = id => meetings.find(m => m.id === id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ═══════════ router ═══════════ */
+const VIEWS = { landing:'scr-landing', generator:'scr-input', input:'scr-input', progress:'scr-progress', brief:'scr-brief', workspace:'scr-dash', dash:'scr-dash', call:'scr-call', fb:'scr-fb' };
+function nav(name){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.getElementById(VIEWS[name]).classList.add('on');
+  window.scrollTo({top:0});
+  if(name==='dash' || name==='workspace') renderDash();
+  if(name==='generator' || name==='input') refreshBackendState();
+}
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-nav]');
+  if(el){
+    e.preventDefault();
+    if(el.dataset.closeFirst) document.getElementById(el.dataset.closeFirst).classList.remove('on');
+    if(!el.dataset.id) pendingLinkId = el.hasAttribute('data-keep-link') ? pendingLinkId : pendingLinkId;
+    nav(el.dataset.nav);
+  }
+});
+document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => document.getElementById(b.dataset.close).classList.remove('on')));
+
+/* ═══════════ landing: pricing toggle ═══════════ */
+(function(){
+  const toggle = document.getElementById('billToggle');
+  if(!toggle) return;
+  const lblM = document.getElementById('lblMonthly'), lblA = document.getElementById('lblAnnual');
+  const badge = document.getElementById('saveBadge');
+  let annual = false;
+  function render(){
+    toggle.classList.toggle('on', annual);
+    toggle.setAttribute('aria-checked', annual);
+    lblM.classList.toggle('active', !annual);
+    lblA.classList.toggle('active', annual);
+    badge.classList.toggle('show', annual);
+    document.querySelectorAll('.price').forEach(el=>{
+      const v = annual ? el.dataset.annual : el.dataset.monthly;
+      el.textContent = '₹' + Number(v).toLocaleString('en-IN');
+    });
+    document.querySelectorAll('.plan-note.note').forEach(el=>{
+      if(!el.dataset.orig) el.dataset.orig = el.textContent;
+      el.textContent = annual ? el.dataset.orig.replace('billed monthly','billed annually') : el.dataset.orig;
+    });
+  }
+  toggle.addEventListener('click', ()=>{ annual=!annual; render(); });
+  toggle.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); annual=!annual; render(); }});
+  render();
+})();
+
+/* ═══════════ brief normaliser (schema-defensive) ═══════════ */
+function deepFind(obj, keys, depth=0){
+  if(!obj || typeof obj !== 'object' || depth > 6) return undefined;
+  for(const k of keys){ if(obj[k] !== undefined && obj[k] !== null && obj[k] !== '') return obj[k]; }
+  for(const v of Object.values(obj)){
+    const hit = deepFind(v, keys, depth+1);
+    if(hit !== undefined) return hit;
+  }
+  return undefined;
+}
+function normSeverity(s){
+  s = String(s||'').toUpperCase();
+  if(s.includes('HIGH')) return 'HIGH';
+  if(s.includes('MED')) return 'MEDIUM';
+  if(s.includes('LOW')) return 'LOW';
+  return 'MEDIUM';
+}
+function asList(v){
+  if(Array.isArray(v)) return v;
+  if(typeof v === 'string') return v.split(/\n+/).map(x=>x.replace(/^[-•\d.)\s]+/,'').trim()).filter(Boolean);
+  return [];
+}
+function normalizeBrief(raw){
+  let data = raw;
+  if(Array.isArray(data)) data = data[0];
+  if(data && data.data !== undefined) data = data.data;
+  if(data && data.raw_output !== undefined){
+    try {
+      const parsed = typeof data.raw_output === 'string' ? JSON.parse(data.raw_output) : data.raw_output;
+      data = parsed;
+    } catch(e){ return null; }
+  }
+  if(Array.isArray(data)) data = data[0];
+  if(typeof data === 'string'){ try{ data = JSON.parse(data); }catch(e){ return null; } }
+  if(!data || typeof data !== 'object') return null;
+
+  const sigsRaw = deepFind(data, ['pain_signals','top_pain_signals','signals','painSignals','top_signals']);
+  const qsRaw   = deepFind(data, ['discovery_questions','suggested_questions','questions','discoveryQuestions']);
+  const chkRaw  = deepFind(data, ['pre_call_checklist','checklist','preCallChecklist','pre_call_checks']);
+  let company = deepFind(data, ['company','company_name','prospect','companyName']);
+  if(!company && data.company_snapshot && typeof data.company_snapshot === 'string'){
+    company = data.company_snapshot.split(' is ')[0].split(' has ')[0].trim() || '';
+  }
+  const snap    = deepFind(data, ['company_snapshot','snapshot','summary','company_summary','overview']);
+  const conf    = deepFind(data, ['confidence','confidence_level']);
+
+  const signals = Array.isArray(sigsRaw) ? sigsRaw.map(s => {
+    if(typeof s === 'string') return { title:s, severity:'MEDIUM', evidence:'', why:'', talk:'', source:'', tag:'' };
+    return {
+      title: s.title || s.signal || s.name || s.pain || 'Untitled signal',
+      severity: normSeverity(s.severity || s.level),
+      evidence: s.evidence || s.proof || '',
+      why: s.why_it_matters || s.why || s.impact || '',
+      talk: s.talk_track || s.talkTrack || s.question || '',
+      source: s.source || s.source_url || s.url || s.link || '',
+      tag: s.tag || s.type || s.signal_type || s.category || ''
+    };
+  }).filter(s => s.title) : [];
+
+  const questions = asList(qsRaw).map(q => typeof q === 'string' ? q : (q.question || q.text || '')).filter(Boolean);
+  const checklist = asList(chkRaw).map(c => typeof c === 'string' ? c : (c.item || c.text || '')).filter(Boolean);
+
+  if(!signals.length && !questions.length) return null;
+  return {
+    company: typeof company === 'string' ? company : '',
+    snapshot: typeof snap === 'string' ? snap : '',
+    confidence: conf ? normSeverity(conf) === 'MEDIUM' && !String(conf).toUpperCase().includes('MED') ? String(conf).toUpperCase() : normSeverity(conf) : '',
+    signals, questions, checklist, linkedAt: Date.now()
+  };
+}
+
+/* ═══════════ generator ═══════════ */
+function refreshBackendState(){
+  const ok = CONFIG.WEBHOOK_URL && CONFIG.WEBHOOK_URL.startsWith('https://') && !CONFIG.WEBHOOK_URL.includes('PASTE');
+  const el = document.getElementById('backendState');
+  el.textContent = ok ? 'CONFIGURED' : 'NOT CONFIGURED — edit CONFIG.WEBHOOK_URL in this file';
+  el.style.color = ok ? 'var(--low)' : 'var(--high)';
+  const banner = document.getElementById('linkedBanner');
+  if(pendingLinkId && byId(pendingLinkId)){
+    banner.style.display = 'block';
+    banner.innerHTML = `<b>Linked generation:</b> this brief will attach to your meeting with ${esc(byId(pendingLinkId).company)} automatically.`;
+  } else banner.style.display = 'none';
+}
+let progTimerInt = null, progStepInt = null;
+function setStep(i, state){
+  const line = document.querySelector(`.prog-line[data-step="${i}"]`);
+  if(!line) return;
+  line.className = 'prog-line ' + state;
+  line.querySelector('.st').textContent = state==='doing' ? 'Running' : state==='done' ? 'Done' : 'Queued';
+}
+async function generate(){
+  const co = document.getElementById('gCo').value.trim();
+  if(!co){ alert('Company name is required.'); return; }
+  currentCtx = {
+    company: co,
+    industry: document.getElementById('gInd').value,
+    location: document.getElementById('gLoc').value.trim(),
+    role: document.getElementById('gRole').value,
+    date: document.getElementById('gDate').value,
+    notes: document.getElementById('gNotes').value.trim()
+  };
+  nav('progress');
+  document.getElementById('progTitle').textContent = 'Generating brief — ' + co;
+  document.getElementById('progError').innerHTML = '';
+  [0,1,2,3].forEach(i=>setStep(i,''));
+  setStep(0,'doing');
+  const t0 = Date.now();
+  clearInterval(progTimerInt); clearInterval(progStepInt);
+  progTimerInt = setInterval(()=>{ document.getElementById('progTimer').textContent = 'Elapsed: ' + Math.round((Date.now()-t0)/1000) + 's'; }, 1000);
+  let stepIdx = 0;
+  progStepInt = setInterval(()=>{ if(stepIdx<2){ setStep(stepIdx,'done'); stepIdx++; setStep(stepIdx,'doing'); } }, 9000);
+
+  const payload = {
+    company: co, company_name: co,
+    industry: currentCtx.industry,
+    location: currentCtx.location,
+    role: currentCtx.role, prospect_role: currentCtx.role,
+    meeting_date: currentCtx.date, date: currentCtx.date,
+    notes: currentCtx.notes, crm_notes: currentCtx.notes
+  };
+  const ctrl = new AbortController();
+  const timeout = setTimeout(()=>ctrl.abort(), 150000);
+  try {
+    const res = await fetch(CONFIG.WEBHOOK_URL, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload), signal: ctrl.signal
+    });
+    clearTimeout(timeout);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    clearInterval(progTimerInt); clearInterval(progStepInt);
+    [0,1,2].forEach(i=>setStep(i,'done')); setStep(3,'done');
+    currentBriefRaw = data;
+    currentBrief = normalizeBrief(data);
+    try { localStorage.setItem(LS_BRIEF, JSON.stringify({data, savedAt: Date.now()})); } catch(e){}
+    renderBrief();
+    nav('brief');
+  } catch(err){
+    clearTimeout(timeout);
+    clearInterval(progTimerInt); clearInterval(progStepInt);
+    document.getElementById('progError').innerHTML = `
+      <div class="error-box">
+        <h3>Generation failed</h3>
+        <p style="color:var(--muted);font-size:13.5px">${esc(err.name==='AbortError' ? 'Timed out after 150 seconds.' : err.message)}</p>
+        <ul>
+          <li>Check the n8n workflow toggle is <b>Active</b> (Production URL mode), not grey.</li>
+          <li>Groq free tier rate limit — wait 60 seconds and retry.</li>
+          <li>If HTTP 404: the webhook URL in CONFIG at the top of this file doesn't match n8n.</li>
+        </ul>
+        <div style="margin-top:16px"><button class="btn btn-ghost btn-sm" data-nav="input">← Back &amp; retry</button></div>
+      </div>`;
+  }
+}
+document.getElementById('btnGenerate').addEventListener('click', generate);
+
+function renderBrief(){
+  const b = document.getElementById('briefBody');
+  const actions = document.getElementById('briefActions');
+  if(!currentBrief){
+    b.innerHTML = `
+      <div class="sbrief-head"><h3>${esc(currentCtx.company)}</h3><span class="sconf MEDIUM">Unparsed response</span></div>
+      <p class="screen-sub" style="margin-bottom:16px">The agent responded, but the JSON didn't match any known brief schema. Raw output below — send this to whoever maintains the n8n workflow.</p>
+      <div class="raw-fallback">${esc(JSON.stringify(currentBriefRaw, null, 2))}</div>`;
+  } else {
+    const c = currentBrief;
+    b.innerHTML = `
+      <div class="sbrief-head"><h3>${esc(c.company || currentCtx.company)}</h3>${c.confidence?`<span class="sconf ${esc(c.confidence)}">Confidence: ${esc(c.confidence)}</span>`:''}</div>
+      <div class="smeta">${esc(currentCtx.industry)} · ${esc(currentCtx.location)}${currentCtx.date?' · Meeting: '+esc(currentCtx.date):''} · Role: ${esc(currentCtx.role)}</div>
+      ${c.snapshot?`<div class="ssummary">${esc(c.snapshot)}</div>`:''}
+      ${c.signals.length?`<div class="ssec-title" style="margin-top:8px">Top pain signals</div>`:''}
+      ${c.signals.map(s=>`
+        <div class="ssig ${s.severity}">
+          <div class="ssig-top">
+            <div class="ssig-title">${esc(s.title)}</div>
+            <div class="stags">${s.source?`<span class="stag">${esc(String(s.source).replace(/^https?:\/\/(www\.)?/,'').split('/')[0])}</span>`:''}<span class="stag ${s.severity}">${s.severity} severity</span>${s.tag?`<span class="stag">${esc(s.tag)}</span>`:''}</div>
+          </div>
+          ${s.evidence?`<div class="srow"><b>Evidence</b><p>${esc(s.evidence)}</p></div>`:''}
+          ${s.why?`<div class="srow"><b>Why it matters</b><p>${esc(s.why)}</p></div>`:''}
+          ${s.talk?`<div class="srow"><b>Talk track</b><div class="stalk">${esc(s.talk)}</div></div>`:''}
+          ${s.source && String(s.source).startsWith('http')?`<div class="srow"><b>Source</b><p><a href="${esc(s.source)}" target="_blank" rel="noopener">${esc(s.source)}</a></p></div>`:''}
+        </div>`).join('')}
+      ${c.questions.length?`<div class="ssec-title">Discovery questions — tap when used</div><div class="sq-grid">${c.questions.map((q,qi)=>`<div class="sq-item"><input type="checkbox" class="sq-check" id="q${qi}"><label for="q${qi}">${esc(q)}</label></div>`).join('')}</div>`:''}
+      ${c.checklist.length?`<div class="ssec-title">Pre-call checklist</div><ul class="schk">${c.checklist.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}`;
+  }
+  const linked = pendingLinkId && byId(pendingLinkId);
+  actions.innerHTML = `
+    ${currentBrief && linked ? `<button class="btn btn-amber" id="briefAttach">Save to ${esc(byId(pendingLinkId).company)} → dashboard</button>` : ''}
+    ${currentBrief && !linked ? `<button class="btn btn-amber" id="briefNewMeet">Create meeting from this brief</button>` : ''}
+    <button class="btn btn-ghost" data-nav="input">Generate another</button>
+    <button class="btn btn-ghost" data-nav="dash">Go to workspace →</button>`;
+  const attach = document.getElementById('briefAttach');
+  if(attach) attach.addEventListener('click', () => {
+    const m = byId(pendingLinkId);
+    m.brief = currentBrief;
+    m.callState = { used:{}, live:{}, notes: m.callState?.notes || '' };
+    m.feedback = null;
+    if(currentCtx.date) m.date = m.date || currentCtx.date;
+    pendingLinkId = null;
+    save(); nav('dash');
+  });
+  const nm = document.getElementById('briefNewMeet');
+  if(nm) nm.addEventListener('click', () => {
+    openMeetingModal(null);
+    document.getElementById('mCo').value = currentBrief.company || currentCtx.company;
+    document.getElementById('mDate').value = currentCtx.date || '';
+    document.getElementById('mRole').value = currentCtx.role || 'CFO';
+    const ind = document.getElementById('mInd');
+    [...ind.options].forEach(o=>{ if(o.value===currentCtx.industry) ind.value = currentCtx.industry; });
+    document.getElementById('mNotes').value = currentCtx.notes || '';
+    editId = null;
+    window.__attachAfterSave = true;
+  });
+}
+
+/* ═══════════ risk & stats ═══════════ */
+function riskOf(m){
+  if(!m.brief || !m.brief.signals.length) return 'NONE';
+  const sev = m.brief.signals.map(s => s.severity);
+  if(sev.includes('HIGH')) return 'HIGH';
+  if(sev.includes('MEDIUM')) return 'MEDIUM';
+  return 'LOW';
+}
+const RISK_ORDER = { HIGH:0, MEDIUM:1, LOW:2, NONE:3 };
+function stats(){
+  const withBrief = meetings.filter(m => m.brief);
+  const withFb = meetings.filter(m => m.feedback);
+  const ratings = withFb.map(m => m.feedback.relevance).filter(Boolean);
+  const avg = ratings.length ? (ratings.reduce((a,b)=>a+b,0)/ratings.length).toFixed(1) : null;
+  let confirmed = 0, total = 0;
+  withFb.forEach(m => {
+    if(!m.brief) return;
+    total += m.brief.signals.length;
+    confirmed += Object.values(m.feedback.confirmed||{}).filter(Boolean).length;
+  });
+  const rate = total ? Math.round(confirmed/total*100) + '%' : null;
+  return { briefs: withBrief.length, avg, rate, calls: withFb.length };
+}
+
+/* ═══════════ dashboard ═══════════ */
+function renderDash(){
+  const s = stats();
+  document.getElementById('statsStrip').innerHTML = `
+    <div class="qstat"><div class="num ${s.briefs?'':'blank'}">${s.briefs||'—'}</div><div class="lbl">Briefs linked</div><div class="sub">node 06</div></div>
+    <div class="qstat"><div class="num ${s.calls?'':'blank'}">${s.calls||'—'}</div><div class="lbl">Calls logged</div><div class="sub">node 09</div></div>
+    <div class="qstat"><div class="num ${s.avg?'':'blank'}">${s.avg||'—'}</div><div class="lbl">Avg brief relevance / 5</div><div class="sub">node 10 · feedback</div></div>
+    <div class="qstat"><div class="num ${s.rate?'':'blank'}">${s.rate||'—'}</div><div class="lbl">Signals confirmed on calls</div><div class="sub">node 10 · accuracy</div></div>`;
+
+  const list = document.getElementById('meetList');
+  const sorted = [...meetings].sort((a,b) => (RISK_ORDER[riskOf(a)]-RISK_ORDER[riskOf(b)]) || String(a.date).localeCompare(String(b.date)));
+  document.getElementById('meetCount').textContent = meetings.length ? meetings.length + ' scheduled' : '';
+  if(!meetings.length){
+    list.innerHTML = `<div class="empty"><b>No meetings yet.</b><br>Add one, then generate its brief — it links automatically.</div>`;
+  } else {
+    list.innerHTML = sorted.map(m => {
+      const r = riskOf(m);
+      const fb = m.feedback;
+      return `<div class="meet-row">
+        <div class="meet-top">
+          <div>
+            <div class="meet-co">${esc(m.company)}</div>
+            <div class="meet-meta">${esc(m.date||'no date')}${m.time?' · '+esc(m.time):''}<span class="sep">·</span>${esc(m.role)}<span class="sep">·</span>${esc(m.industry)}${m.brief?`<span class="sep">·</span>${m.brief.signals.length} signals${m.brief.confidence?' · confidence: '+esc(m.brief.confidence):''}`:''}</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            ${fb ? `<span class="outcome-tag">${esc(fb.outcome||'logged')}${fb.relevance?' · '+fb.relevance+'/5':''}</span>` : ''}
+            <span class="risk ${r}">${r==='NONE'?'No brief':r+' risk'}</span>
+          </div>
+        </div>
+        <div class="meet-actions">
+          ${m.brief
+            ? `<button class="btn btn-ghost btn-sm" data-act="call" data-id="${m.id}">In-call view</button>
+               <button class="btn btn-ghost btn-sm" data-act="fb" data-id="${m.id}">${fb?'Edit feedback':'Log feedback'}</button>
+               <button class="btn btn-ghost btn-sm" data-act="gen" data-id="${m.id}">Regenerate brief</button>`
+            : `<button class="btn btn-ghost btn-sm" data-act="gen" data-id="${m.id}">Generate brief →</button>
+               <button class="btn btn-ghost btn-sm" data-act="link" data-id="${m.id}">Link saved brief</button>`}
+          <button class="btn btn-ghost btn-sm" data-act="edit" data-id="${m.id}">Edit</button>
+          <button class="btn btn-ghost btn-sm btn-danger" data-act="del" data-id="${m.id}">Delete</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  const alerts = [];
+  meetings.forEach(m => (m.brief?.signals||[]).forEach(sg => {
+    if(sg.severity==='HIGH' || sg.severity==='MEDIUM') alerts.push({co:m.company, t:sg.title, sev:sg.severity});
+  }));
+  alerts.sort((a,b)=>RISK_ORDER[a.sev]-RISK_ORDER[b.sev]);
+  document.getElementById('alertCount').textContent = alerts.length ? alerts.length + ' active' : '';
+  document.getElementById('alertList').innerHTML = alerts.length
+    ? alerts.slice(0,8).map(a=>`<div class="alert-row ${a.sev}"><div class="alert-co">${esc(a.co)}</div><div class="alert-sig">${esc(a.t)}</div><div class="alert-sev ${a.sev}">${a.sev} severity</div></div>`).join('')
+    : `<div class="empty">High- and medium-severity signals from linked briefs appear here.</div>`;
+}
+document.getElementById('meetList').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if(!b) return;
+  const id = b.dataset.id, m = byId(id);
+  if(b.dataset.act==='del'){ if(confirm('Delete this meeting and its feedback?')){ meetings = meetings.filter(x=>x.id!==id); save(); renderDash(); } }
+  if(b.dataset.act==='edit') openMeetingModal(m);
+  if(b.dataset.act==='link') openImport(id);
+  if(b.dataset.act==='call') openCall(id);
+  if(b.dataset.act==='fb') openFb(id);
+  if(b.dataset.act==='gen'){
+    pendingLinkId = id;
+    document.getElementById('gCo').value = m.company;
+    const ind = document.getElementById('gInd');
+    [...ind.options].forEach(o=>{ if(o.value===m.industry) ind.value = m.industry; });
+    document.getElementById('gRole').value = m.role;
+    document.getElementById('gDate').value = m.date || '';
+    document.getElementById('gNotes').value = m.notes || '';
+    nav('input');
+  }
+});
+
+/* ═══════════ meeting modal ═══════════ */
+function openMeetingModal(m){
+  editId = m ? m.id : null;
+  window.__attachAfterSave = false;
+  document.getElementById('mmTitle').textContent = m ? 'Edit meeting' : 'New meeting';
+  document.getElementById('mCo').value = m?.company || '';
+  document.getElementById('mDate').value = m?.date || '';
+  document.getElementById('mTime').value = m?.time || '';
+  document.getElementById('mRole').value = m?.role || 'CFO';
+  document.getElementById('mInd').value = m?.industry || 'Manufacturing';
+  document.getElementById('mNotes').value = m?.notes || '';
+  document.getElementById('modalMeeting').classList.add('on');
+  document.getElementById('mCo').focus();
+}
+document.getElementById('btnNewMeeting').addEventListener('click', () => openMeetingModal(null));
+document.getElementById('btnSaveMeeting').addEventListener('click', () => {
+  const co = document.getElementById('mCo').value.trim();
+  const date = document.getElementById('mDate').value;
+  if(!co || !date){ alert('Company name and meeting date are required.'); return; }
+  const fields = { company:co, date, time:document.getElementById('mTime').value,
+    role:document.getElementById('mRole').value, industry:document.getElementById('mInd').value,
+    notes:document.getElementById('mNotes').value.trim() };
+  let target;
+  if(editId){ target = byId(editId); Object.assign(target, fields); }
+  else { target = { id:'m'+Date.now(), ...fields, brief:null, feedback:null, callState:{used:{},live:{},notes:''} }; meetings.push(target); }
+  if(window.__attachAfterSave && currentBrief){
+    target.brief = currentBrief;
+    target.callState = { used:{}, live:{}, notes:'' };
+    window.__attachAfterSave = false;
+  }
+  save(); document.getElementById('modalMeeting').classList.remove('on'); nav('dash');
+});
+
+/* ═══════════ link saved brief (fallback path) ═══════════ */
+function openImport(id){
+  importId = id;
+  const m = byId(id);
+  document.getElementById('impCo').textContent = m.company;
+  document.getElementById('impPaste').value = '';
+  const status = document.getElementById('impStatus');
+  let last = null;
+  try { last = JSON.parse(localStorage.getItem(LS_BRIEF)); } catch(e){}
+  if(last){
+    const norm = normalizeBrief(last);
+    const age = last.savedAt ? Math.round((Date.now()-last.savedAt)/60000) : null;
+    status.innerHTML = norm
+      ? `<b>Last generated brief found</b> — ${norm.company?esc(norm.company)+' · ':''}${norm.signals.length} signals, ${norm.questions.length} questions${age!==null?', '+age+' min ago':''}.${norm.company && norm.company.toLowerCase().slice(0,6)!==m.company.toLowerCase().slice(0,6) ? ' <span style="color:var(--med)">Company name doesn\u2019t match this meeting — check before importing.</span>':''}`
+      : `A saved brief exists but couldn't be parsed — use the paste option below.`;
+  } else {
+    status.innerHTML = `<b>No saved brief found on this device.</b> Generate one, or paste the webhook JSON from an n8n execution below.`;
+  }
+  document.getElementById('modalImport').classList.add('on');
+}
+function applyBrief(norm){
+  const m = byId(importId);
+  m.brief = norm;
+  m.callState = { used:{}, live:{}, notes: m.callState?.notes || '' };
+  m.feedback = null;
+  save(); document.getElementById('modalImport').classList.remove('on'); renderDash();
+}
+document.getElementById('btnImpLast').addEventListener('click', () => {
+  let last = null;
+  try { last = JSON.parse(localStorage.getItem(LS_BRIEF)); } catch(e){}
+  const norm = last && normalizeBrief(last);
+  if(!norm){ alert('No parseable brief saved on this device. Generate one first, or paste the JSON.'); return; }
+  applyBrief(norm);
+});
+document.getElementById('btnImpPaste').addEventListener('click', () => {
+  let parsed;
+  try { parsed = JSON.parse(document.getElementById('impPaste').value); }
+  catch(e){ alert('That isn\u2019t valid JSON. Copy the response body from the n8n execution log.'); return; }
+  const norm = normalizeBrief(parsed);
+  if(!norm){ alert('Parsed the JSON but found no pain signals or questions in it. Check you copied the agent\u2019s output node.'); return; }
+  applyBrief(norm);
+});
+
+/* ═══════════ in-call ═══════════ */
+function openCall(id){
+  activeId = id;
+  const m = byId(id);
+  m.callState = m.callState || {used:{},live:{},notes:''};
+  document.getElementById('callTitle').textContent = m.company;
+  document.getElementById('callMeta').textContent = `${m.role} · ${m.date}${m.time?' '+m.time:''} · mark prompts as you use them; confirmations pre-fill the feedback form`;
+  document.getElementById('callNotes').value = m.callState.notes || '';
+  renderCall(m); nav('call');
+}
+function renderCall(m){
+  const qs = m.brief.questions.length ? m.brief.questions : ['(No discovery questions were captured in this brief)'];
+  document.getElementById('callQuestions').innerHTML = qs.map((q,i)=>`
+    <div class="q-item ${m.callState.used[i]?'used':''}" data-qi="${i}" role="button" tabindex="0">
+      <span class="q-idx">${String(i+1).padStart(2,'0')}</span>
+      <span class="q-text">${esc(q)}</span>
+      <span class="q-mark">${m.callState.used[i]?'Used':'Mark used'}</span>
+    </div>`).join('');
+  document.getElementById('qUsedCount').textContent = Object.values(m.callState.used).filter(Boolean).length + ' / ' + m.brief.questions.length + ' used';
+  document.getElementById('callSignals').innerHTML = m.brief.signals.map((s,i)=>{
+    const st = m.callState.live[i];
+    return `<div class="sig-live ${s.severity}">
+      <div class="t">${esc(s.title)}</div>
+      <div class="tri" data-si="${i}">
+        <button data-v="yes" class="${st==='yes'?'on-yes':''}">Confirmed</button>
+        <button data-v="no" class="${st==='no'?'on-no':''}">Was false</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+document.getElementById('callQuestions').addEventListener('click', e => {
+  const it = e.target.closest('.q-item'); if(!it) return;
+  const m = byId(activeId); const i = it.dataset.qi;
+  m.callState.used[i] = !m.callState.used[i]; save(); renderCall(m);
+});
+document.getElementById('callQuestions').addEventListener('keydown', e => {
+  if(e.key==='Enter' || e.key===' '){ const it = e.target.closest('.q-item'); if(it){ e.preventDefault(); it.click(); } }
+});
+document.getElementById('callSignals').addEventListener('click', e => {
+  const b = e.target.closest('button[data-v]'); if(!b) return;
+  const m = byId(activeId); const i = b.parentElement.dataset.si;
+  m.callState.live[i] = m.callState.live[i]===b.dataset.v ? null : b.dataset.v;
+  save(); renderCall(m);
+});
+document.getElementById('callNotes').addEventListener('input', e => { const m = byId(activeId); m.callState.notes = e.target.value; save(); });
+document.getElementById('btnCallToFeedback').addEventListener('click', () => openFb(activeId));
+
+/* ═══════════ feedback ═══════════ */
+const OUTCOMES = ['Qualified','Exploring','Not a fit'];
+let fbState = null;
+function openFb(id){
+  activeId = id;
+  const m = byId(id);
+  const prev = m.feedback;
+  fbState = prev ? JSON.parse(JSON.stringify(prev)) : {
+    confirmed: Object.fromEntries(m.brief.signals.map((s,i)=>[i, m.callState?.live?.[i]==='yes'])),
+    none:false, relevance:null,
+    used: Object.fromEntries(m.brief.questions.map((q,i)=>[i, !!m.callState?.used?.[i]])),
+    outcome:null, notes: m.callState?.notes || ''
+  };
+  document.getElementById('fbTitle').textContent = 'Feedback — ' + m.company;
+  document.getElementById('fbMeta').textContent = `${m.role} · ${m.date} · closes the loop for node 10 — this data feeds the quality stats on the dashboard`;
+  document.getElementById('fbNotes').value = fbState.notes || '';
+  document.getElementById('fbSaved').classList.remove('show');
+  renderFb(m); nav('fb');
+}
+function renderFb(m){
+  document.getElementById('fbSignals').innerHTML = m.brief.signals.map((s,i)=>`
+    <div class="chk-row">
+      <input type="checkbox" id="fbs${i}" data-fi="${i}" ${fbState.confirmed[i]&&!fbState.none?'checked':''} ${fbState.none?'disabled':''}>
+      <label class="lbl2" for="fbs${i}">${esc(s.title)}<span class="sev-mini ${s.severity}">${s.severity}</span></label>
+    </div>`).join('');
+  document.getElementById('fbNone').checked = !!fbState.none;
+  document.getElementById('fbRate').innerHTML = [1,2,3,4,5].map(n=>`<button data-r="${n}" class="${fbState.relevance===n?'sel':''}">${n}</button>`).join('');
+  document.getElementById('fbQuestions').innerHTML = m.brief.questions.length ? m.brief.questions.map((q,i)=>`
+    <div class="chk-row">
+      <input type="checkbox" id="fbq${i}" data-qi2="${i}" ${fbState.used[i]?'checked':''}>
+      <label class="lbl2" for="fbq${i}">${esc(q)}</label>
+    </div>`).join('') : `<div class="empty" style="padding:10px">No discovery questions in this brief.</div>`;
+  document.getElementById('fbOutcome').innerHTML = OUTCOMES.map(o=>`<button data-o="${o}" class="${fbState.outcome===o?'sel':''}">${o}</button>`).join('');
+}
+document.getElementById('fbSignals').addEventListener('change', e => {
+  const i = e.target.dataset.fi; if(i===undefined) return;
+  fbState.confirmed[i] = e.target.checked;
+});
+document.getElementById('fbNone').addEventListener('change', e => {
+  fbState.none = e.target.checked;
+  if(fbState.none) Object.keys(fbState.confirmed).forEach(k=>fbState.confirmed[k]=false);
+  renderFb(byId(activeId));
+});
+document.getElementById('fbRate').addEventListener('click', e => {
+  const b = e.target.closest('[data-r]'); if(!b) return;
+  fbState.relevance = Number(b.dataset.r); renderFb(byId(activeId));
+});
+document.getElementById('fbQuestions').addEventListener('change', e => {
+  const i = e.target.dataset.qi2; if(i===undefined) return;
+  fbState.used[i] = e.target.checked;
+});
+document.getElementById('fbOutcome').addEventListener('click', e => {
+  const b = e.target.closest('[data-o]'); if(!b) return;
+  fbState.outcome = b.dataset.o; renderFb(byId(activeId));
+});
+document.getElementById('btnSaveFb').addEventListener('click', () => {
+  if(!fbState.relevance){ alert('Set a relevance rating (1\u20135) before saving \u2014 it\u2019s the core quality metric.'); return; }
+  if(!fbState.outcome){ alert('Pick a call outcome before saving.'); return; }
+  fbState.notes = document.getElementById('fbNotes').value.trim();
+  const m = byId(activeId);
+  m.feedback = { ...fbState, savedAt: Date.now() };
+  save();
+  document.getElementById('fbSaved').classList.add('show');
+  setTimeout(()=>nav('dash'), 700);
+});
+
+/* ═══════════ init ═══════════ */
+renderDash();
+refreshBackendState();
+</script>
+</body>
+</html>
